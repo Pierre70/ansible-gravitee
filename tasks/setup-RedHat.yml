@@ -1,0 +1,31 @@
+---
+- name: Ensure dependencies are installed.
+  package:
+    name:
+      - curl
+      - libselinux-python
+      - initscripts
+    state: installed
+
+- name: Download specific Gravitee version.
+  get_url:
+    url: "{{ Gravitee_url }}/graviteeio-full-{{ gravitee_version }}.zip"
+    dest: "/tmp/graviteeio-full-{{ gravitee_version }}.zip"
+  when: gravitee_version is defined
+
+- name: Check if we downloaded a specific version of Jenkins.
+  stat:
+    path: "/tmp/graviteeio-full-{{ gravitee_version }}.zip"
+  register: specific_version
+  when: gravitee_version is defined
+
+- name: Creates directory
+  file: "path={{ Gravitee_path }} state=directory"
+
+- name: Install our specific version of Jenkins.
+  unarchive:
+    src: "/tmp/graviteeio-full-{{ gravitee_version }}.zip"
+    dest: "{{ Gravitee_path }}"
+  when: gravitee_version is defined and specific_version.stat.exists
+  
+
